@@ -56,6 +56,10 @@ def update_game():
     # тут обновляется логика игры - движение объектов, проверка столкновений и тп.
     pass
 
+def sprites():
+    all_sprites = pygame.sprite.Group()
+    sprite = pygame.sprite.Sprite()
+
 
 # --- Главный игровой цикл ---
 while game_running:
@@ -64,6 +68,8 @@ while game_running:
 
     # --- 2. Обновляем состояние игры ---
     update_game()
+
+
 
     # --- 3. Отрисовываем сцену ---
     draw_scene()
