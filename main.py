@@ -33,6 +33,23 @@ def draw_scene():
 
     pygame.display.flip()  # Обновляем экран
 
+    # создадим группу, содержащую все спрайты
+    all_sprites = pygame.sprite.Group()
+
+    # создадим спрайт
+    button = pygame.sprite.Sprite()
+    # определим его вид
+    button.image = load_image("button.jpg")
+    # и размеры
+    button.rect = button.image.get_rect()
+    # добавим спрайт в группу
+    all_sprites.add(button)
+
+    button.rect.x = 500
+    button.rect.y = 700
+
+    all_sprites.draw(screen)
+
 
 def handle_input():
     """ Функция для обработки ввода """
@@ -42,7 +59,7 @@ def handle_input():
             game_running = False
         # Тут обрабатываются нажатия кнопок, мыши и т.п.
 
-def load_image(name, colorkey=None):
+def load_image(name):
     fullname = os.path.join('data', name)
     # если файл не существует, то выходим
     if not os.path.isfile(fullname):
@@ -54,8 +71,6 @@ def load_image(name, colorkey=None):
 def update_game():
     """ Функция для обновления состояния игры """
     # тут обновляется логика игры - движение объектов, проверка столкновений и тп.
-    pass
-
 
 # --- Главный игровой цикл ---
 while game_running:
