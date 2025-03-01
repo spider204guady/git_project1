@@ -1,91 +1,81 @@
 import pygame
-import sys
-import os
+import random
 
 # Инициализация Pygame
 pygame.init()
 
-# --- Настройки экрана ---
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Моя Pygame Игра")
+# Параметры экрана
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Ну, погоди!")
 
-# --- Цвета ---
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (122, 122, 122)
-RED = (255, 0, 0)
+# Загрузка изображений
+wolf = pygame.image.load("wolf.png")
+egg = pygame.image.load("egg.png")
+background = pygame.image.load("background.jpg")
 
-# --- Переменные игры ---
-game_running = True
-clock = pygame.time.Clock()  # для управления FPS
+# Масштабирование изображений
+wolf = pygame.transform.scale(wolf, (100, 150))
+egg = pygame.transform.scale(egg, (40, 50))
 
+# Параметры волка
+wolf_x = WIDTH // 2 - 50
+wolf_y = HEIGHT - 160
+wolf_speed = 10
 
-# --- Функции игры ---
+# Параметры яиц
+eggs = []
+egg_speed = 5
+spawn_time = 1000  # время появления нового яйца (мс)
+last_spawn = pygame.time.get_ticks()
+score = 0
 
-def draw_scene():
-    """ Функция для отрисовки сцены игры """
-    screen.fill(GRAY)  # Заливаем фон белым
+# Шрифт для счета
+font = pygame.font.Font(None, 36)
 
-    # Тут можно добавить отрисовку игровых элементов
-    pygame.draw.rect(screen, WHITE, (320, 180, 1280, 720))  # Пример квадрата
+# Главный цикл игры
+running = True
+while running:
+    screen.blit(background, (0, 0))
+    screen.blit(wolf, (wolf_x, wolf_y))
 
-    pygame.display.flip()  # Обновляем экран
-
-    # создадим группу, содержащую все спрайты
-    all_sprites = pygame.sprite.Group()
-
-    # создадим спрайт
-    button = pygame.sprite.Sprite()
-    # определим его вид
-    button.image = load_image("button.jpg")
-    # и размеры
-    button.rect = button.image.get_rect()
-    # добавим спрайт в группу
-    all_sprites.add(button)
-
-    button.rect.x = 500
-    button.rect.y = 700
-
-    all_sprites.draw(screen)
-
-
-def handle_input():
-    """ Функция для обработки ввода """
-    global game_running
+    # Обработка событий
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            game_running = False
-        # Тут обрабатываются нажатия кнопок, мыши и т.п.
+            running = False
 
-def load_image(name):
-    fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    return image
+    # Управление волком
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and wolf_x > 0:
+        wolf_x -= wolf_speed
+    if keys[pygame.K_RIGHT] and wolf_x < WIDTH - 100:
+        wolf_x += wolf_speed
 
-def update_game():
-    """ Функция для обновления состояния игры """
-    # тут обновляется логика игры - движение объектов, проверка столкновений и тп.
+    # Создание новых яиц
+    current_time = pygame.time.get_ticks()
+    if current_time - last_spawn > spawn_time:
+        egg_x = random.randint(50, WIDTH - 50)
+        eggs.append([egg_x, 0])
+        last_spawn = current_time
 
-# --- Главный игровой цикл ---
-while game_running:
-    # --- 1. Обрабатываем ввод ---
-    handle_input()
+    # Обновление положения яиц
+    for egg in eggs[:]:
+        egg[1] += egg_speed
+        screen.blit((egg, (egg[0], egg[1])))
 
-    # --- 2. Обновляем состояние игры ---
-    update_game()
+        # Проверка столкновения волка с яйцом
+        if wolf_x < egg[0] < wolf_x + 100 and wolf_y < egg[1] < wolf_y + 150:
+            eggs.remove(egg)
+            score += 1
+        elif egg[1] > HEIGHT:
+            eggs.remove(egg)
+            score -= 1
 
-    # --- 3. Отрисовываем сцену ---
-    draw_scene()
+    # Отображение счета
+    score_text = font.render(f"Счет: {score}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
 
-    # --- Управление FPS ---
-    clock.tick(60)  # Ограничиваем частоту кадров до 60 FPS
+    pygame.display.flip()
+    pygame.time.delay(30)
 
-# Выход из Pygame
 pygame.quit()
-sys.exit()
